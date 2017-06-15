@@ -1,5 +1,5 @@
 # image-hash
-A wrapper around [block-hash](https://www.google.com) to easily hash a local or remote file with Node.
+A wrapper around [block-hash](https://github.com/commonsmachinery/blockhash-js) to easily hash a local or remote file with Node.
 
 ## Install
 ```bash
