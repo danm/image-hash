@@ -1,0 +1,26 @@
+{
+  "name": "image-hash",
+  "version": "1.0.1",
+  "description": "Create a hash from an image",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danm/image-hash.git"
+  },
+  "keywords": [
+    "phash"
+  ],
+  "author": "Daniel Morrison <daniel.morrison@bbc.co.uk>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/danm/image-hash/issues"
+  },
+  "homepage": "https://github.com/danm/image-hash#readme",
+  "dependencies": {
+    "jpeg-js": "^0.2.0",
+    "request": "^2.81.0"
+  }
+}
