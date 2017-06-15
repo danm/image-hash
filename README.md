@@ -40,8 +40,9 @@ imageHash('./_95695590_tv039055678.jpg', 16, true, (error, data) => {
 ```
 // name
 imageHash(location, bits, precise, callback)
+
 // types
-imageHash(string|object, int, int, function)
+imageHash(string|object, int, bool, function)
 ```
 
 ### Image-Hash Arguments
