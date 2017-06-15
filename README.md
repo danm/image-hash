@@ -8,7 +8,7 @@ npm i -S image-hash
 
 ## Use
 ```javascript
-const imageHash = require('image-hash);
+const imageHash = require('image-hash');
 
 // remote file simple
 imageHash('https://ichef-1.bbci.co.uk/news/660/cpsprodpb/7F76/production/_95703623_mediaitem95703620.jpg', 16, true, (error, data) => {
