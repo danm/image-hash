@@ -1,6 +1,6 @@
 {
   "name": "image-hash",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Create a hash from an image",
   "main": "index.js",
   "scripts": {
