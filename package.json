@@ -11,7 +11,10 @@
     "url": "git+https://github.com/danm/image-hash.git"
   },
   "keywords": [
-    "phash", "hash", "image hash", "perceptual hash"
+    "phash",
+    "hash",
+    "image hash",
+    "perceptual hash"
   ],
   "author": "Daniel Morrison <daniel.morrison@bbc.co.uk>",
   "license": "MIT",
