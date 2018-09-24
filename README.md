@@ -1,6 +1,8 @@
 # image-hash
 A wrapper around [block-hash](https://github.com/commonsmachinery/blockhash-js) to easily hash a local or remote file with Node.
 
+Supports JPG and PNG
+
 ## Install
 ```bash
 npm i -S image-hash
@@ -62,7 +64,7 @@ error | `Error Object` or `null` | If a run time error is detected this will be 
 data | `string` or `null` | If there is no run time error, this be will be your hashed result, otherwise `null` 
 
 ## Testing
-I will get some Mocha tests soon!
+`npm test`
 
 ## Credit
 
