@@ -24,6 +24,12 @@
   "homepage": "https://github.com/danm/image-hash#readme",
   "dependencies": {
     "jpeg-js": "^0.2.0",
+    "pngjs": "^3.3.3",
     "request": "^2.81.0"
+  },
+  "devDependencies": {
+    "eslint": "^5.6.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0"
   }
 }
