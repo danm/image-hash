@@ -64,7 +64,9 @@ export const imageHash = (oldSrc, bits, method, cb) => {
     if (err) {
       cb(new Error(err));
     } else {
-      checkFileType(res.request.uri.href, res.body);
+      const url = new URL(res.request.uri.href);
+      const name = url.pathname;
+      checkFileType(name, res.body);
     }
   };
 

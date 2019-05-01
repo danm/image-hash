@@ -1,0 +1,44 @@
+# Javascript Node CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-javascript/ for more details
+#
+version: 2
+jobs:
+  test:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npm test
+  deploy:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      - run: git config --global user.email "ci@circleci.com"
+      - run: git config --global user.name "CircleCI"
+      - run: npm ci
+      - run: npm test
+      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+      - run: npm version patch
+      - run: npm run build
+      - run: npm publish
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test:
+         filters:  # using regex filters requires the entire branch to match
+          branches:
+            ignore:  # only branches matching the below regex filters will run
+              - master
+  test-build-deploy:
+    jobs:
+      - deploy:
+         filters:  # using regex filters requires the entire branch to match
+          branches:
+            only:  # only branches matching the below regex filters will run
+              - master

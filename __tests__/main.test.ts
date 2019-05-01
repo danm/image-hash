@@ -1,5 +1,6 @@
-import imageHash from '../src/imageHash';
+import { imageHash } from '../src/imageHash';
 
+jest.setTimeout(30000);
 describe('hash images', () => {
   test('should hash a local jpg', (done) => {
     imageHash('example/_95695590_tv039055678.jpg', 16, true, (err, res) => {
@@ -23,7 +24,7 @@ describe('hash images', () => {
   });
 
   test('should hash a local PNG', (done) => {
-    imageHash('example/Example.PNG', 16, true, (err, res) => {
+    imageHash('example/Example2.PNG', 16, true, (err, res) => {
       expect(res).toEqual('00007ffe7c3e780e601e603e7ffe7ffe47fe020642067ff66b066a567ffe7ffe');
       done();
     });
@@ -106,6 +107,15 @@ describe('hash images', () => {
       url: 'https://ichef.bbci.co.uk/news/800/cpsprodpb/145F4/production/_106744438_p077xzvx.jpg',
     }, 16, true, (err, res) => {
       expect(res).toBe('ffffbe7ff83fc03fc43ffc17bc07f807f00ff00ff00fe00ff05fe00fe00fe00f');
+      done();
+    });
+  });
+
+  test('Should handle url when no extenion provided (#7)', (done) => {
+    imageHash({
+      url: 'https://falabella.scene7.com/is/image/Falabella/prod11830022_6',
+    }, 16, true, (err, res) => {
+      expect(res).toBe('80ff807f807f807fcc7fc007c067c077c8f3c183c013ccf7c823c8f3f8f7f8ff');
       done();
     });
   });
