@@ -10,7 +10,7 @@ npm i -S image-hash
 
 ## Use
 ```javascript
-const imageHash = require('image-hash');
+const { imageHash }= require('image-hash');
 
 // remote file simple
 imageHash('https://ichef-1.bbci.co.uk/news/660/cpsprodpb/7F76/production/_95703623_mediaitem95703620.jpg', 16, true, (error, data) => {
@@ -62,6 +62,9 @@ Argument | Type | Description
 --- | --- | --- | --- | ---
 error | `Error Object` or `null` | If a run time error is detected this will be an `Error Object`, otherwise `null`
 data | `string` or `null` | If there is no run time error, this be will be your hashed result, otherwise `null` 
+
+## Development
+I have made this with Typescript, ESLint, Jest, Babel and VSCode. All config files and global binaries are included. For developers using VS Code, make sure you have ESLint extension installed.
 
 ## Testing
 `npm test`
