@@ -30,7 +30,11 @@ workflows:
   version: 2
   test:
     jobs:
-      - test
+      - test:
+         filters:  # using regex filters requires the entire branch to match
+          branches:
+            ignore:  # only branches matching the below regex filters will run
+              - master
   test-build-deploy:
     jobs:
       - deploy:
