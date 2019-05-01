@@ -3,7 +3,7 @@ workflow "Test on PR" {
     "GitHub Action for npm-1",
     "Filters for GitHub Actions",
   ]
-  on = "check_run"
+  on = "push"
 }
 
 action "NPM Install" {
@@ -29,15 +29,15 @@ action "Patch Version" {
   args = "version patch"
 }
 
-action "GitHub Action for npm" {
+action "NPM Patch" {
   uses = "actions/npm@59b64a598378f31e49cb76f27d6f3312b582f680"
   needs = ["Patch Version"]
   args = "run build"
 }
 
-action "GitHub Action for npm-1" {
+action "NPM Publish" {
   uses = "actions/npm@59b64a598378f31e49cb76f27d6f3312b582f680"
-  needs = ["GitHub Action for npm"]
+  needs = ["NPM Patch"]
   args = "publish"
   secrets = ["NPM"]
 }
