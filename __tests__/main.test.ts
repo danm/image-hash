@@ -23,7 +23,7 @@ describe('hash images', () => {
   });
 
   test('should hash a local PNG', (done) => {
-    imageHash('example/Example.PNG', 16, true, (err, res) => {
+    imageHash('example/Example2.PNG', 16, true, (err, res) => {
       expect(res).toEqual('00007ffe7c3e780e601e603e7ffe7ffe47fe020642067ff66b066a567ffe7ffe');
       done();
     });
