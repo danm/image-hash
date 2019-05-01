@@ -13,7 +13,7 @@ jobs:
       - checkout
       - run: npm ci
       - run: npm test
-  build:
+  deploy:
     working_directory: ~/repo
     docker:
       - image: circleci/node:latest
@@ -23,12 +23,13 @@ jobs:
       - run: npm test
       - run: npm version patch
       - run: npm run build
+      - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
       - run: npm publish
 workflows:
   version: 2
-  justtest:
+  test:
     jobs:
       - test
   test-build:
     jobs:
-      - test
+      - deploy
