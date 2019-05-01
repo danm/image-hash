@@ -1,8 +1,5 @@
 workflow "Test on PR" {
-  resolves = [
-    "GitHub Action for npm-1",
-    "Filters for GitHub Actions",
-  ]
+  resolves = ["NPM Publish"]
   on = "push"
 }
 
@@ -41,4 +38,3 @@ action "NPM Publish" {
   args = "publish"
   secrets = ["NPM"]
 }
-
