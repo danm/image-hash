@@ -13,9 +13,22 @@ jobs:
       - checkout
       - run: npm ci
       - run: npm test
-
+  build:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout
+      - run: npm ci
+      - run: npm test
+      - run: npm version patch
+      - run: npm run build
+      - run: npm publish
 workflows:
   version: 2
   justtest:
+    jobs:
+      - test
+  test-build:
     jobs:
       - test
