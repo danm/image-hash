@@ -1,5 +1,6 @@
 import { imageHash } from '../src/imageHash';
 
+jest.setTimeout(30000);
 describe('hash images', () => {
   test('should hash a local jpg', (done) => {
     imageHash('example/_95695590_tv039055678.jpg', 16, true, (err, res) => {
