@@ -19,10 +19,12 @@ jobs:
       - image: circleci/node:latest
     steps:
       - checkout
+      - run: git config --global user.email "ci@circleci.com"
+      - run: git config --global user.name "CircleCI"
       - run: npm ci
       - run: npm test
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
-      - run: npm version patch --no-git-tag-version
+      - run: npm version patch
       - run: npm run build
       - run: npm publish
 workflows:
