@@ -4,6 +4,7 @@ import jpeg from 'jpeg-js';
 import { PNG } from 'pngjs';
 import request from 'request';
 import blockhash from './block-hash';
+import { URL } from 'url';
 
 const processPNG = (data, bits, method, cb) => {
   try {
