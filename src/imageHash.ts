@@ -1,10 +1,11 @@
 import fs from 'fs';
+import { Buffer } from 'buffer';
 import fileType from 'file-type';
 import jpeg from 'jpeg-js';
 import { PNG } from 'pngjs';
 import request from 'request';
-import blockhash from './block-hash';
 import { URL } from 'url';
+import blockhash from './block-hash';
 
 const processPNG = (data, bits, method, cb) => {
   try {
@@ -26,13 +27,35 @@ const processJPG = (data, bits, method, cb) => {
   }
 };
 
+interface UrlRequestObject {
+  encoding?: string | null,
+  url: string | null,
+}
+
+interface Base64Object {
+  encoding?: string | null,
+  data: string | null
+}
+
 // eslint-disable-next-line
-export const imageHash = (oldSrc, bits, method, cb) => {
+export const imageHash = (oldSrc: string | UrlRequestObject | Base64Object | Buffer, bits, method, cb) => {
   const src = oldSrc;
+
+  const isBase64Object = (obj: Base64Object | UrlRequestObject): obj is Base64Object => {
+    const casted = (obj as Base64Object);
+    return casted.data && casted.encoding && casted.encoding === 'base64';
+  };
+
+  const isUrlRequestObject = (obj: Base64Object | UrlRequestObject): obj is UrlRequestObject => {
+    const casted = (obj as UrlRequestObject);
+    return casted.url && casted.url.length > 0;
+  };
 
   const checkFileType = (name, data) => {
     // what is the image type
     const type = fileType(data);
+    console.log(type);
+    console.log(data);
     if (!type || !type.mime) {
       cb(new Error('Mime type not found'));
       return;
@@ -87,7 +110,7 @@ export const imageHash = (oldSrc, bits, method, cb) => {
   }
 
   // is src url or file
-  if (typeof src === 'string' && src.indexOf('http') === 0) {
+  if (typeof src === 'string' && (src.indexOf('http') === 0 || src.indexOf('https') === 0)) {
     // url
     const req = {
       url: src,
@@ -95,7 +118,14 @@ export const imageHash = (oldSrc, bits, method, cb) => {
     };
 
     request(req, handleRequest);
-  } else if (typeof src === 'object') {
+  } else if (Buffer.isBuffer(src)) {
+    // image buffers
+    checkFileType('input-img', src);
+  } else if (typeof src !== 'string' && isBase64Object(src)) {
+    // Base64 Object
+    const buffer = new Buffer(src.data, 'base64');
+    checkFileType('', buffer);
+  } else if (typeof src !== 'string' && isUrlRequestObject(src)) {
     // Request Object
     src.encoding = null;
     request(src, handleRequest);

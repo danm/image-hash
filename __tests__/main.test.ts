@@ -1,3 +1,5 @@
+import Buffer from 'buffer';
+import request from 'request';
 import { imageHash } from '../src/imageHash';
 
 jest.setTimeout(30000);
@@ -118,5 +120,27 @@ describe('hash images', () => {
       expect(res).toBe('80ff807f807f807fcc7fc007c067c077c8f3c183c013ccf7c823c8f3f8f7f8ff');
       done();
     });
+  });
+
+  test('Should handle local file buffer', (done) => {
+    try {
+      const testUrl = 'https://www.archives.gov/files/research/american-west/images/west-cover-m.jpgg';
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      request({ url: testUrl, encoding: null }, (err, _resp, buffer) => {
+        if (err) {
+          return done(err);
+        }
+        imageHash(buffer, 16, true, (err, res) => {
+          if (err) {
+            return done(err);
+          }
+          expect(res).not.toHaveLength(0);
+          console.log(res);
+          return done();
+        });
+      });
+    } catch (err) {
+      return done(err);
+    }
   });
 });
