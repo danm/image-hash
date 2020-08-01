@@ -29,7 +29,7 @@
   "homepage": "https://github.com/danm/image-hash#readme",
   "dependencies": {
     "file-type": "^14.6.2",
-    "jpeg-js": "^0.2.0",
+    "jpeg-js": "^0.4.0",
     "pngjs": "^3.3.3",
     "request": "^2.81.0"
   },
