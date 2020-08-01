@@ -5,7 +5,7 @@
   "main": "lib/imageHash.js",
   "types": "lib/imageHash.d.ts",
   "scripts": {
-    "test": "jest",
+    "test": "npx mocha -r ts-node/register __tests__/*.test.ts ",
     "build": "tsc"
   },
   "files": [
@@ -28,26 +28,29 @@
   },
   "homepage": "https://github.com/danm/image-hash#readme",
   "dependencies": {
-    "file-type": "^9.0.0",
+    "file-type": "^14.6.2",
     "jpeg-js": "^0.2.0",
     "pngjs": "^3.3.3",
     "request": "^2.81.0"
   },
   "devDependencies": {
+    "@types/chai": "^4.2.12",
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
     "@babel/plugin-transform-modules-commonjs": "^7.4.4",
     "@babel/preset-env": "^7.3.1",
     "@babel/preset-typescript": "^7.1.0",
     "@babel/runtime": "^7.3.1",
-    "@types/jest": "^24.0.12",
+    "@types/mocha": "^8.0.0",
     "@types/node": "^11.13.8",
     "@typescript-eslint/eslint-plugin": "^1.7.0",
     "@typescript-eslint/parser": "^1.7.0",
+    "chai": "^4.2.0",
     "eslint": "^5.16.0",
     "eslint-config-airbnb-typescript": "^3.0.0",
     "eslint-plugin-import": "^2.17.2",
-    "jest": "^24.0.0",
+    "mocha": "^8.1.0",
+    "ts-node": "^8.10.2",
     "typescript": "^3.3.1"
   }
 }

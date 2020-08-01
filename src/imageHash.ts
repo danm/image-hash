@@ -27,61 +27,81 @@ const processJPG = (data, bits, method, cb) => {
   }
 };
 
+const isUrlRequestObject = (obj: UrlRequestObject | BufferObject): obj is UrlRequestObject => {
+  const casted = (obj as UrlRequestObject);
+  return casted.url && casted.url.length > 0;
+};
+
+const isBufferObject = (obj: UrlRequestObject | BufferObject): obj is BufferObject => {
+  const casted = (obj as BufferObject);
+  return Buffer.isBuffer(casted.data) || (Buffer.isBuffer(casted.data) && (casted.ext && casted.ext.length > 0));
+};
+
 interface UrlRequestObject {
   encoding?: string | null,
   url: string | null,
 }
 
-interface Base64Object {
-  encoding?: string | null,
-  data: string | null
+interface BufferObject {
+  ext?: string,
+  data: Buffer,
+  name?: string
 }
-
 // eslint-disable-next-line
-export const imageHash = (oldSrc: string | UrlRequestObject | Base64Object | Buffer, bits, method, cb) => {
+export const imageHash = (oldSrc: string | UrlRequestObject | BufferObject, bits, method, cb) => {
   const src = oldSrc;
 
-  const isBase64Object = (obj: Base64Object | UrlRequestObject): obj is Base64Object => {
-    const casted = (obj as Base64Object);
-    return casted.data && casted.encoding && casted.encoding === 'base64';
+  const getFileType = async (data: Buffer | string) => {
+    if (typeof src !== 'string' && isBufferObject(src) && src.ext) {
+      return {
+        mime: src.ext,
+      };
+    }
+    try {
+      if (Buffer.isBuffer(data)) {
+        return await fileType.fromBuffer(data);
+      }
+      if (typeof src === 'string') {
+        return await fileType.fromFile(src);
+      }
+      return '';
+    } catch (err) {
+      throw err;
+    }
   };
 
-  const isUrlRequestObject = (obj: Base64Object | UrlRequestObject): obj is UrlRequestObject => {
-    const casted = (obj as UrlRequestObject);
-    return casted.url && casted.url.length > 0;
-  };
-
-  const checkFileType = (name, data) => {
-    // what is the image type
-    const type = fileType(data);
-    console.log(type);
-    console.log(data);
-    if (!type || !type.mime) {
-      cb(new Error('Mime type not found'));
-      return;
-    }
-    if (name.lastIndexOf('.') > 0) {
-      const ext = name
-        .split('.')
-        .pop()
-        .toLowerCase();
-      if (ext === 'png' && type.mime === 'image/png') {
-        processPNG(data, bits, method, cb);
-      } else if ((ext === 'jpg' || ext === 'jpeg') && type.mime === 'image/jpeg') {
-        processJPG(data, bits, method, cb);
-      } else {
-        cb(new Error(`Unrecognized file extension, mime type or mismatch, ext: ${ext} / mime: ${type.mime}`));
+  const checkFileType = (name, data: Buffer | string) => {
+    getFileType(data).then((type) => {
+      // what is the image type
+      if (!type) {
+        cb(new Error('Mime type not found'));
+        return;
       }
-    } else {
-      console.warn('No file extension found, attempting mime typing.');
-      if (type.mime === 'image/png') {
-        processPNG(data, bits, method, cb);
-      } else if (type.mime === 'image/jpeg') {
-        processJPG(data, bits, method, cb);
+      if (name && name.lastIndexOf('.') > 0) {
+        const ext = name
+          .split('.')
+          .pop()
+          .toLowerCase();
+        if (ext === 'png' && type.mime === 'image/png') {
+          processPNG(data, bits, method, cb);
+        } else if ((ext === 'jpg' || ext === 'jpeg') && type.mime === 'image/jpeg') {
+          processJPG(data, bits, method, cb);
+        } else {
+          cb(new Error(`Unrecognized file extension, mime type or mismatch, ext: ${ext} / mime: ${type}`));
+        }
       } else {
-        cb(new Error(`Unrecognized mime type: ${type.mime}`));
+        console.warn('No file extension found, attempting mime typing.');
+        if (type.mime === 'image/png') {
+          processPNG(data, bits, method, cb);
+        } else if (type.mime === 'image/jpeg') {
+          processJPG(data, bits, method, cb);
+        } else {
+          cb(new Error(`Unrecognized mime type: ${type}`));
+        }
       }
-    }
+    }).catch((err) => {
+      cb(err);
+    });
   };
 
   const handleRequest = (err, res) => {
@@ -116,15 +136,10 @@ export const imageHash = (oldSrc: string | UrlRequestObject | Base64Object | Buf
       url: src,
       encoding: null,
     };
-
     request(req, handleRequest);
-  } else if (Buffer.isBuffer(src)) {
+  } else if (typeof src !== 'string' && isBufferObject(src)) {
     // image buffers
-    checkFileType('input-img', src);
-  } else if (typeof src !== 'string' && isBase64Object(src)) {
-    // Base64 Object
-    const buffer = new Buffer(src.data, 'base64');
-    checkFileType('', buffer);
+    checkFileType(src.name, src.data);
   } else if (typeof src !== 'string' && isUrlRequestObject(src)) {
     // Request Object
     src.encoding = null;
