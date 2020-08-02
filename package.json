@@ -6,7 +6,9 @@
   "types": "lib/imageHash.d.ts",
   "scripts": {
     "test": "npx mocha -r ts-node/register __tests__/*.test.ts ",
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "eslint src/*.ts",
+    "lint:fix": "eslint src/*.ts --fix"
   },
   "files": [
     "lib"

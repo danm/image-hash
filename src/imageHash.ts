@@ -34,15 +34,16 @@ const isUrlRequestObject = (obj: UrlRequestObject | BufferObject): obj is UrlReq
 
 const isBufferObject = (obj: UrlRequestObject | BufferObject): obj is BufferObject => {
   const casted = (obj as BufferObject);
-  return Buffer.isBuffer(casted.data) || (Buffer.isBuffer(casted.data) && (casted.ext && casted.ext.length > 0));
+  return Buffer.isBuffer(casted.data)
+    || (Buffer.isBuffer(casted.data) && (casted.ext && casted.ext.length > 0));
 };
 
-interface UrlRequestObject {
+export interface UrlRequestObject {
   encoding?: string | null,
   url: string | null,
 }
 
-interface BufferObject {
+export interface BufferObject {
   ext?: string,
   data: Buffer,
   name?: string
