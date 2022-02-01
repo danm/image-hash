@@ -1,7 +1,7 @@
 # image-hash
 A wrapper around [block-hash](https://github.com/commonsmachinery/blockhash-js) to easily hash a local or remote file with Node.
 
-Supports JPG and PNG
+Supports JPG, PNG and WebP
 
 ## Install
 ```bash
