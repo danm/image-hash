@@ -32,9 +32,9 @@
   "dependencies": {
     "@cwasm/webp": "^0.1.5",
     "file-type": "^14.6.2",
+    "got": "^11.0.1",
     "jpeg-js": "^0.4.0",
-    "pngjs": "^3.3.3",
-    "request": "^2.81.0"
+    "pngjs": "^3.3.3"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
