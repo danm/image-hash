@@ -1,4 +1,3 @@
-
 const median = (data) => {
   const mdarr = data.slice(0).sort((a, b) => a - b);
   if (mdarr.length % 2 === 0) {

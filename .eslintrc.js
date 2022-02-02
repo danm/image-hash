@@ -1,6 +1,6 @@
 module.exports = {
-  extends: ["airbnb-typescript/base"],
-  rules: {
-    "no-console": ["error", { allow: ["warn", "error"] }],
+  extends: ['airbnb-base', 'airbnb-typescript/base'],
+  parserOptions: {
+    project: './tsconfig.json'
   }
 };

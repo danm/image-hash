@@ -5,8 +5,19 @@ import jpeg from 'jpeg-js';
 import { PNG } from 'pngjs';
 import request from 'request';
 import { URL } from 'url';
-import blockhash from './block-hash';
 import webp from '@cwasm/webp';
+import blockhash from './block-hash';
+
+export interface UrlRequestObject {
+  encoding?: string | null,
+  url: string | null,
+}
+
+export interface BufferObject {
+  ext?: string,
+  data: Buffer,
+  name?: string
+}
 
 const processPNG = (data, bits, method, cb) => {
   try {
@@ -49,16 +60,6 @@ const isBufferObject = (obj: UrlRequestObject | BufferObject): obj is BufferObje
     || (Buffer.isBuffer(casted.data) && (casted.ext && casted.ext.length > 0));
 };
 
-export interface UrlRequestObject {
-  encoding?: string | null,
-  url: string | null,
-}
-
-export interface BufferObject {
-  ext?: string,
-  data: Buffer,
-  name?: string
-}
 // eslint-disable-next-line
 export const imageHash = (oldSrc: string | UrlRequestObject | BufferObject, bits, method, cb) => {
   const src = oldSrc;
@@ -69,17 +70,13 @@ export const imageHash = (oldSrc: string | UrlRequestObject | BufferObject, bits
         mime: src.ext,
       };
     }
-    try {
-      if (Buffer.isBuffer(data)) {
-        return await fileType.fromBuffer(data);
-      }
-      if (typeof src === 'string') {
-        return await fileType.fromFile(src);
-      }
-      return '';
-    } catch (err) {
-      throw err;
+    if (Buffer.isBuffer(data)) {
+      return fileType.fromBuffer(data);
     }
+    if (typeof src === 'string') {
+      return fileType.fromFile(src);
+    }
+    return '';
   };
 
   const checkFileType = (name, data: Buffer | string) => {
