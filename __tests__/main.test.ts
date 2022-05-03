@@ -1,8 +1,7 @@
-import Buffer from 'buffer';
 import request from 'request';
-import { assert, expect } from 'chai';
+import { expect } from 'chai';
 import fs from 'fs';
-import { imageHash } from '../src/imageHash';
+import { imageHash } from '../src/';
 
 describe('hash images', () => {
   it('should hash a local jpg', (done) => {

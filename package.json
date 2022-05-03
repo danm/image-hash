@@ -2,8 +2,8 @@
   "name": "image-hash",
   "version": "5.1.0",
   "description": "Create a hash from an image",
-  "main": "lib/imageHash.js",
-  "types": "lib/imageHash.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "test": "npx mocha -r ts-node/register __tests__/*.test.ts ",
     "build": "tsc",
