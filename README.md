@@ -101,9 +101,11 @@ interface BufferObject {
 | data     | `string` or `null`       | If there is no run time error, this be will be your hashed result, otherwise `null` |
 
 ## Development
+
 I have made this with Typescript, ESLint, Jest, Babel and VSCode. All config files and global binaries are included. For developers using VS Code, make sure you have ESLint extension installed.
 
 ## Testing
+
 `npm test`
 
 ## Credit
