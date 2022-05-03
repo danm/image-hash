@@ -89,6 +89,7 @@ interface UrlRequestObject {
   encoding?: string | null,
   url: string | null,
 };
+
 // Buffer Object
 interface BufferObject {
   ext?: string, // mime type of buffered file
