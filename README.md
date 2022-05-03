@@ -70,12 +70,12 @@ imageHash(string|object, int, bool, function)
 
 ### Image-Hash Arguments
 
-| Argument | Type                 | Description                                                                                                                                                                                                                                                                                                                                                  | Mandatory | Example   |
-| -------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- | --------- |
-| location | `object` or `string` | A [RequestJS Object](https://github.com/request/request#requestoptions-callback), `Buffer` object (See input types below for more details), or `String` with a valid url or file location                                                                                                                                                                                                                               | Yes       | see above |
-| bits     | `int`                | The number of bits in a row. The more bits, the more unique the hash.                                                                                                                                                                                                                                                                                        | Yes       | 8         |
-| precise  | `bool`               | Whether a precision algorithm is used. `true` Precise but slower, non-overlapping blocks. `false` Quick and crude, non-overlapping blocks. Method 2 is recommended as a good tradeoff between speed and good matches on any image size. The quick ones are only advisable when the image width and height are an even multiple of the number of blocks used. | Yes       | `true`    |
-| callback | `function`           | A function with `error` and `data` arguments - see below                                                                                                                                                                                                                                                                                                     |
+| Argument | Type | Description | Mandatory | Example |
+| -------- | ---- | ----------- | --------- | ------- |
+| location | `object` or `string` | A [RequestJS Object](https://github.com/request/request#requestoptions-callback), `Buffer` object (See input types below for more details), or `String` with a valid url or file location | Yes | see above |
+| bits | `int` | The number of bits in a row. The more bits, the more unique the hash. | Yes | 8 |
+| precise  | `bool` | Whether a precision algorithm is used. `true` Precise but slower, non-overlapping blocks. `false` Quick and crude, non-overlapping blocks. Method 2 is recommended as a good tradeoff between speed and good matches on any image size. The quick ones are only advisable when the image width and height are an even multiple of the number of blocks used. | Yes | `true` |
+| callback | `function` | A function with `error` and `data` arguments - see below |
 
 #### Location Object Types
 
