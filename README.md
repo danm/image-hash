@@ -1,14 +1,17 @@
 # image-hash
+
 A wrapper around [block-hash](https://github.com/commonsmachinery/blockhash-js) to easily hash a local or remote file with Node.
 
 Supports JPG, PNG and WebP
 
 ## Install
+
 ```bash
 npm i -S image-hash
 ```
 
 ## Use
+
 ```javascript
 const { imageHash }= require('image-hash');
 
@@ -60,6 +63,7 @@ imageHash({
 ```
 
 ## API
+
 ```
 // name
 imageHash(location, bits, precise, callback)
