@@ -115,4 +115,3 @@ The hard bit of this comes with thanks from [commonsmachinery](https://github.co
 ## License
 
 Distributed under an MIT license
-
