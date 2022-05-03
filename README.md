@@ -72,6 +72,10 @@ imageHash(location, bits, precise, callback);
 imageHash(string|object, int, bool, function);
 ```
 
+## SETTINGS
+Image hash will log out warnings if environment variable `VERBOSE` is set to true.
+
+
 ### Image-Hash Arguments
 
 | Argument | Type | Description | Mandatory | Example |
