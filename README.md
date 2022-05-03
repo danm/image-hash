@@ -96,7 +96,7 @@ interface BufferObject {
 ### Callback Arguments
 
 | Argument | Type                     | Description                                                                         |
-| -------- | ------------------------ | ----------------------------------------------------------------------------------- |  |  |
+| -------- | ------------------------ | ----------------------------------------------------------------------------------- |
 | error    | `Error Object` or `null` | If a run time error is detected this will be an `Error Object`, otherwise `null`    |
 | data     | `string` or `null`       | If there is no run time error, this be will be your hashed result, otherwise `null` |
 
