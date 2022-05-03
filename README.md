@@ -64,12 +64,12 @@ imageHash({
 
 ## API
 
-```
+```typescript
 // name
-imageHash(location, bits, precise, callback)
+imageHash(location, bits, precise, callback);
 
 // types
-imageHash(string|object, int, bool, function)
+imageHash(string|object, int, bool, function);
 ```
 
 ### Image-Hash Arguments
