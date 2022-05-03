@@ -1,6 +1,6 @@
 {
   "name": "image-hash",
-  "version": "5.2.0",
+  "version": "5.3.0",
   "description": "Create a hash from an image",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
