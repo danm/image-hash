@@ -109,7 +109,7 @@ export const imageHash = (oldSrc: string | UrlRequestObject | BufferObject, bits
         } else if (type.mime === 'image/webp') {
           processWebp(data, bits, method, cb);
         } else {
-          cb(new Error(`Unrecognized mime type: ${type}`));
+          cb(new Error(`Unrecognized mime type: ${type.mime}`));
         }
       }
     }).catch((err) => {
