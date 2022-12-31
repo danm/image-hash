@@ -6,5 +6,31 @@
     "javascriptreact",
     "typescript",
     "typescriptreact"
-  ]
+  ],
+  "cSpell.words": [
+    "blockhash"
+  ],
+  "files.exclude": {
+    "**/logs": true,
+    "**/*.log": true,
+    "**/npm-debug.log*": true,
+    "**/pids": true,
+    "**/*.pid": true,
+    "**/*.seed": true,
+    "**/lib-cov": true,
+    "**/coverage": true,
+    "**/coverage-ts": true,
+    "**/.nyc_output": true,
+    "**/.grunt": true,
+    "**/.lock-wscript": true,
+    "build/Release": true,
+    "**/node_modules": true,
+    "**/jspm_packages": true,
+    "**/.npm": true,
+    "**/.node_repl_history": true,
+    "**/lib": true,
+    "**/.DS_Store": true,
+    "**/dist": true,
+    "**/.vscode": true
+  }
 }
