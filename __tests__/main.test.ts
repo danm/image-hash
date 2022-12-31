@@ -1,3 +1,4 @@
+import 'whatwg-fetch';
 import { readFile } from 'fs/promises';
 import { expect, describe, it } from '@jest/globals';
 import { imageHash } from '../src/index';
