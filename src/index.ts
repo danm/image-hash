@@ -5,7 +5,7 @@ import { decode as decodeJpeg } from 'jpeg-js';
 import { PNG } from 'pngjs';
 import { URL } from 'url';
 import { decode as decodeWebp } from '@cwasm/webp';
-import blockHash from './block-hash';
+import { blockHash } from './block-hash';
 
 export type BufferObject = {
   ext?: string;

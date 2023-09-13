@@ -187,7 +187,7 @@ const bmvbHash = (data: Data, bits: number) => {
   return bitsToHexHash(result);
 };
 
-export default (imgData: Data, bits: number, method: 1 | 2) => {
+export const blockHash = (imgData: Data, bits: number, method: 1 | 2) => {
   if (method === 1) return bmvbHashEven(imgData, bits);
   if (method === 2) return bmvbHash(imgData, bits);
 
