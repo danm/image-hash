@@ -78,7 +78,9 @@ const processImage = async (src: string | Buffer | BufferObject, bits: number, m
  * @param src - The image source. It can be a URL, an image buffer, or a file path.
  * @param bits - The number of bits for the hash. Higher values yield more detailed hashes but may be slower to compute.
  * @param method - A boolean flag indicating whether a precision algorithm is used.
+ *
  *                `true` Precise but slower, non-overlapping blocks. Only advisable when the image width and height are an even multiple of the number of blocks used.
+ *
  *                `false` Quick and crude, non-overlapping blocks. A good trade-off between speed and good matches on any image size.
  * @throws {Error} Throws an error if no image source is provided.
  * @returns A Promise that resolves to the hash value of the input image.
