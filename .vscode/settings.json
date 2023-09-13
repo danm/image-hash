@@ -8,7 +8,10 @@
     "typescriptreact"
   ],
   "cSpell.words": [
-    "blockhash"
+    "blockhash",
+    "casted",
+    "cwasm",
+    "pngjs"
   ],
   "files.exclude": {
     "**/logs": true,

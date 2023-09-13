@@ -1,10 +1,10 @@
 import { readFile } from 'fs/promises';
 import { Buffer } from 'buffer';
 import { fileTypeFromBuffer, fileTypeFromFile } from 'file-type';
-import jpeg from 'jpeg-js';
+import { decode as decodeJpeg } from 'jpeg-js';
 import { PNG } from 'pngjs';
 import { URL } from 'url';
-import webp from '@cwasm/webp';
+import { decode as decodeWebp } from '@cwasm/webp';
 import blockHash from './block-hash';
 
 export type BufferObject = {
@@ -19,12 +19,12 @@ const processPNG = (data: Buffer, bits: number, method: boolean) => {
 };
 
 const processJPG = (data: Buffer, bits: number, method: boolean) => {
-  const decoded = jpeg.decode(data);
+  const decoded = decodeJpeg(data);
   return blockHash(decoded, bits, method ? 2 : 1);
 };
 
 const processWebp = (data: Buffer, bits: number, method: boolean) => {
-  const decoded = webp.decode(data);
+  const decoded = decodeWebp(data);
   return blockHash(decoded, bits, method ? 2 : 1);
 };
 
