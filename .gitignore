@@ -13,6 +13,7 @@ lib-cov
 
 # Coverage directory used by tools like istanbul
 coverage
+coverage-ts
 
 # nyc test coverage
 .nyc_output
@@ -37,3 +38,5 @@ jspm_packages
 .node_repl_history
 lib
 .DS_Store
+dist
+.vscode
