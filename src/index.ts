@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 import { Buffer } from 'buffer';
-import fileType from 'file-type';
+import { fileTypeFromBuffer, fileTypeFromFile } from 'file-type';
 import jpeg from 'jpeg-js';
 import { PNG } from 'pngjs';
 import { URL } from 'url';
@@ -36,8 +36,8 @@ const isBufferObject = (obj: string | Buffer | BufferObject): obj is BufferObjec
 
 const getFileType = async (src: string | Buffer | BufferObject, data: Buffer | string) => {
   if (typeof src !== 'string' && isBufferObject(src) && src.ext) return { mime: src.ext };
-  if (Buffer.isBuffer(data)) return fileType.fromBuffer(data);
-  if (typeof src === 'string') return fileType.fromFile(src);
+  if (Buffer.isBuffer(data)) return fileTypeFromBuffer(data);
+  if (typeof src === 'string') return fileTypeFromFile(src);
   return '';
 };
 

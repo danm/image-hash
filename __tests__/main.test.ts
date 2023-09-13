@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import { expect, describe, it } from '@jest/globals';
+import { expect, describe, it } from 'vitest';
 import { imageHash } from '../src/index';
 
 describe('hash images', () => {
