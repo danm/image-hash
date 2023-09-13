@@ -67,6 +67,21 @@ const processImage = async (src: string | Buffer | BufferObject, bits: number, m
   }
 };
 
+/**
+ * Calculates a hash value for an image from various sources.
+ *
+ * This function takes an image source, the number of bits for the hash,
+ * and a method flag to generate a hash for the given image. It supports
+ * different types of image sources, including URLs, image buffers, and files.
+ *
+ * @param src - The image source. It can be a URL, an image buffer,
+ *                                    or a file path.
+ * @param bits - The number of bits for the hash. Higher values yield more
+ *                        detailed hashes but may be slower to compute.
+ * @param method - A boolean flag indicating the method to use for hashing.
+ * @throws {Error} Throws an error if no image source is provided.
+ * @returns A Promise that resolves to the hash value of the input image.
+ */
 export const imageHash = async (src: string | BufferObject, bits: number, method: boolean) => {
   // check if source is assigned
   if (src === undefined) throw new Error('No image source provided');
