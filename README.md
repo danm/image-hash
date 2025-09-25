@@ -22,9 +22,9 @@ imageHash('https://ichef-1.bbci.co.uk/news/660/cpsprodpb/7F76/production/_957036
   // 0773063f063f36070e070a070f378e7f1f000fff0fff020103f00ffb0f810ff0
 });
 
-// remote file with requestjs config object
+// remote file with fetch config object
 const config = {
-  uri: 'https://ichef-1.bbci.co.uk/news/660/cpsprodpb/7F76/production/_95703623_mediaitem95703620.jpg'
+  url: 'https://ichef-1.bbci.co.uk/news/660/cpsprodpb/7F76/production/_95703623_mediaitem95703620.jpg'
 };
 
 imageHash(config, 16, true, (error, data) => {
@@ -80,7 +80,7 @@ Image hash will log out warnings if environment variable `VERBOSE` is set to tru
 
 | Argument | Type | Description | Mandatory | Example |
 | -------- | ---- | ----------- | --------- | ------- |
-| location | `object` or `string` | A [RequestJS Object](https://github.com/request/request#requestoptions-callback), `Buffer` object (See input types below for more details), or `String` with a valid url or file location | Yes | see above |
+| location | `object` or `string` | A configuration object with a remote `url` (see below for details), `Buffer` object (See input types below for more details), or `String` with a valid url or file location | Yes | see above |
 | bits | `int` | The number of bits in a row. The more bits, the more unique the hash. | Yes | 8 |
 | precise  | `bool` | Whether a precision algorithm is used. `true` Precise but slower, non-overlapping blocks. `false` Quick and crude, non-overlapping blocks. Method 2 is recommended as a good tradeoff between speed and good matches on any image size. The quick ones are only advisable when the image width and height are an even multiple of the number of blocks used. | Yes | `true` |
 | callback | `function` | A function with `error` and `data` arguments - see below |
@@ -92,6 +92,8 @@ Image hash will log out warnings if environment variable `VERBOSE` is set to tru
 interface UrlRequestObject {
   encoding?: string | null,
   url: string | null,
+  // Additional fetch RequestInit options may be provided
+  [key: string]: unknown,
 };
 
 // Buffer Object

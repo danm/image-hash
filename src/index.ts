@@ -1,9 +1,8 @@
 import fs from 'fs';
 import { Buffer } from 'buffer';
-import fileType from 'file-type';
+import { fileTypeFromFile, fileTypeFromBuffer } from 'file-type';
 import jpeg from 'jpeg-js';
 import { PNG } from 'pngjs';
-import request from 'request';
 import { URL } from 'url';
 import webp from '@cwasm/webp';
 import blockhash from './block-hash';
@@ -11,6 +10,7 @@ import blockhash from './block-hash';
 export interface UrlRequestObject {
   encoding?: string | null,
   url: string | null,
+  [key: string]: unknown,
 }
 
 export interface BufferObject {
@@ -71,10 +71,10 @@ export const imageHash = (oldSrc: string | UrlRequestObject | BufferObject, bits
       };
     }
     if (Buffer.isBuffer(data)) {
-      return fileType.fromBuffer(data);
+      return fileTypeFromBuffer(data);
     }
     if (typeof src === 'string') {
-      return fileType.fromFile(src);
+      return fileTypeFromFile(src);
     }
     return '';
   };
@@ -117,13 +117,48 @@ export const imageHash = (oldSrc: string | UrlRequestObject | BufferObject, bits
     });
   };
 
-  const handleRequest = (err, res) => {
-    if (err) {
-      cb(new Error(err));
-    } else {
-      const url = new URL(res.request.uri.href);
-      const name = url.pathname;
-      checkFileType(name, res.body);
+  const fetchRemoteImage = async (remoteSrc: string | UrlRequestObject) => {
+    if (fetch && typeof fetch !== 'function') {
+      cb(new Error('Global fetch API is not available. Node.js 18+ is required.'));
+      return;
+    }
+
+    const requestUrl = typeof remoteSrc === 'string' ? remoteSrc : remoteSrc.url;
+
+    if (!requestUrl) {
+      cb(new Error('No URL provided for remote image.'));
+      return;
+    }
+
+    let init: { [key: string]: unknown } | undefined;
+
+    if (typeof remoteSrc !== 'string') {
+      init = { ...remoteSrc };
+      delete init.url;
+      delete init.encoding;
+    }
+
+    try {
+      const response = await fetch(requestUrl, init);
+      if (!response || !response.ok) {
+        const status = response ? `${response.status} ${response.statusText}` : 'Unknown status';
+        throw new Error(`Failed to fetch image. HTTP status: ${status}`);
+      }
+
+      const arrayBuffer = await response.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      let pathname = '';
+      try {
+        const url = new URL(response.url || requestUrl);
+        pathname = url.pathname;
+      } catch (err) {
+        pathname = '';
+      }
+
+      checkFileType(pathname, buffer);
+    } catch (error) {
+      cb(error);
     }
   };
 
@@ -145,18 +180,13 @@ export const imageHash = (oldSrc: string | UrlRequestObject | BufferObject, bits
   // is src url or file
   if (typeof src === 'string' && (src.indexOf('http') === 0 || src.indexOf('https') === 0)) {
     // url
-    const req = {
-      url: src,
-      encoding: null,
-    };
-    request(req, handleRequest);
+    fetchRemoteImage(src);
   } else if (typeof src !== 'string' && isBufferObject(src)) {
     // image buffers
     checkFileType(src.name, src.data);
   } else if (typeof src !== 'string' && isUrlRequestObject(src)) {
     // Request Object
-    src.encoding = null;
-    request(src, handleRequest);
+    fetchRemoteImage(src);
   } else {
     // file
     fs.readFile(src, handleReadFile);

@@ -10,8 +10,9 @@ jobs:
       - image: circleci/node:latest
     steps:
       - checkout
-      - run: npm ci
-      - run: npm test
+      - run: npm install -g pnpm
+      - run: pnpm ci
+      - run: pnpm test
   deploy:
     working_directory: ~/repo
     docker:
@@ -20,12 +21,13 @@ jobs:
       - checkout
       - run: git config --global user.email "ci@circleci.com"
       - run: git config --global user.name "CircleCI"
-      - run: npm ci
-      - run: npm test
+      - run: npm install -g pnpm
+      - run: pnpm ci
+      - run: pnpm test
       - run: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
-      - run: npm version patch
-      - run: npm run build
-      - run: npm publish
+      - run: pnpm version patch
+      - run: pnpm run build
+      - run: pnpm publish
 workflows:
   version: 2
   test:
