@@ -1,22 +1,26 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "esModuleInterop": true,
-        "target": "es2015",
-        "noEmitOnError": true,
-        "declaration": true,
-        "resolveJsonModule": true,
-        "moduleResolution": "node",
-        "sourceMap": true,
-        "outDir": "lib",
-        "baseUrl": ".",
-        "paths": {
-            "*": [
-                "node_modules/*",
-            ]
-        },
+  "compilerOptions": {
+    "outDir": "lib",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "noEmitOnError": true,
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": false,
+    "skipLibCheck": true,
+    "rootDir": "src",
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*"]
     },
-    "include": [
-        "src/**/*"
-    ]
+    "moduleDetection": "force",
+    "allowArbitraryExtensions": false,
+    "newLine": "lf"
+  },
+  "include": ["src/**/*"]
 }
