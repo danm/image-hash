@@ -122,9 +122,9 @@ pnpm run build
 
 ## Publishing
 
-Every push to `master` publishes a new patch version to npm. The CI workflow bumps the patch version, publishes, then pushes the version commit and tag back to `master`. For a major or minor release, set `version` in `package.json` to the version before the one you want, e.g. `9.0.0` to publish `9.0.1`.
+Every push to `master` stages a new patch version on npm. The CI workflow bumps the patch version, stages it with `npm stage publish`, then pushes the version commit and tag back to `master`. The version goes live once a maintainer approves it on npm with 2FA. For a major or minor release, set `version` in `package.json` to the version before the one you want, e.g. `9.0.0` to publish `9.0.1`.
 
-Publishing uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers), so no npm token is stored in GitHub. It is configured on npmjs.com under the package's Settings → Trusted Publisher, with the GitHub repository `danm/image-hash` and the workflow file `ci.yml`.
+Staging uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers), so no npm token is stored in GitHub. It is configured on npmjs.com under the package's Settings → Trusted Publisher, with the GitHub repository `danm/image-hash`, the workflow file `ci.yml`, and only staged publishing allowed.
 
 ## Credit
 
