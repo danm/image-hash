@@ -1,8 +1,8 @@
 import { readFile } from 'node:fs/promises';
-import { createServer } from 'node:http';
+import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import path from 'node:path';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { imageHash } from '../src/index.js';
 
 const fixture = (name: string) => path.join(import.meta.dirname, '../example', name);
@@ -26,17 +26,23 @@ const server = createServer((req, res) => {
 });
 let baseUrl: string;
 
-beforeAll(async () => {
+const listen = async (s: Server) => {
   await new Promise<void>((resolve) => {
-    server.listen(0, '127.0.0.1', resolve);
+    s.listen(0, '127.0.0.1', resolve);
   });
-  baseUrl = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  return `http://127.0.0.1:${(s.address() as AddressInfo).port}`;
+};
+
+const close = (s: Server) => new Promise((resolve) => {
+  s.close(resolve);
+});
+
+beforeAll(async () => {
+  baseUrl = await listen(server);
 });
 
 afterAll(async () => {
-  await new Promise((resolve) => {
-    server.close(resolve);
-  });
+  await close(server);
 });
 
 describe('local files', () => {
@@ -57,6 +63,15 @@ describe('local files', () => {
     await expect(imageHash(fixture('_95695590_tv039055678.jpg'), 16, false)).resolves.toBe(JPG_QUICK_HASH);
   });
 
+  it.each([
+    { bits: 8, precise: true, hash: '35313135381d1c3c' },
+    { bits: 8, precise: false, hash: '35313135301f1c39' },
+    { bits: 12, precise: true, hash: '0db09f3831830cb1fb1e01ff0a30783e51f8' },
+    { bits: 12, precise: false, hash: '0db09f3831831c31fb1801ff0af0701ff1e1' },
+  ])('hashes with $bits bits, precise $precise', async ({ bits, precise, hash }) => {
+    await expect(imageHash(fixture('_95695590_tv039055678.jpg'), bits, precise)).resolves.toBe(hash);
+  });
+
   it('defaults to 16 bits with the precise method', async () => {
     await expect(imageHash(fixture('_95695590_tv039055678.jpg'))).resolves.toBe(JPG_HASH);
   });
@@ -71,6 +86,10 @@ describe('local files', () => {
 
   it('rejects when the file is not found', async () => {
     await expect(imageHash(fixture('jpgpreten.png'), 16, true)).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('reads a path starting with "http" as a file, not a url', async () => {
+    await expect(imageHash('http-not-a-url.png', 16, true)).rejects.toMatchObject({ code: 'ENOENT' });
   });
 
   it('rejects when the mime type cannot be detected', async () => {
@@ -96,6 +115,11 @@ describe('buffers', () => {
   it('hashes a buffer object without a mime type', async () => {
     const data = await readFile(fixture('_95695591_tv039055678.jpeg'));
     await expect(imageHash({ data }, 16, true)).resolves.toBe(JPG_HASH);
+  });
+
+  it('detects the mime type when ext is empty', async () => {
+    const data = await readFile(fixture('_95695591_tv039055678.jpeg'));
+    await expect(imageHash({ ext: '', data }, 16, true)).resolves.toBe(JPG_HASH);
   });
 
   it('ignores dots in directory names when checking the extension', async () => {
@@ -135,12 +159,40 @@ describe('remote files', () => {
   it('rejects when the url is not found', async () => {
     await expect(imageHash(`${baseUrl}/missing.jpg`, 16, true)).rejects.toThrow('HTTP status: 404');
   });
+
+  it('rejects when the server cannot be reached', async () => {
+    const closed = createServer();
+    const closedUrl = await listen(closed);
+    await close(closed);
+    await expect(imageHash(`${closedUrl}/Example.png`, 16, true)).rejects.toThrow('fetch failed');
+  });
+});
+
+describe('VERBOSE', () => {
+  it('does not log by default', async () => {
+    vi.stubEnv('VERBOSE', undefined);
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await imageHash(fixture('Example'), 16, true);
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('warns about a missing file extension when set', async () => {
+    vi.stubEnv('VERBOSE', 'true');
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await imageHash(fixture('Example'), 16, true);
+    expect(warn).toHaveBeenCalledWith('No file extension found, attempting mime typing.');
+  });
 });
 
 describe('arguments', () => {
-  it('rejects when there is no src', async () => {
+  it.each([undefined, null])('rejects a src of %s', async (src) => {
     // @ts-expect-error testing a missing source
-    await expect(imageHash(undefined, 16, true)).rejects.toThrow('No image source provided');
+    await expect(imageHash(src, 16, true)).rejects.toThrow('No image source provided');
+  });
+
+  it('rejects an unrecognized source', async () => {
+    // @ts-expect-error testing an invalid source
+    await expect(imageHash({ path: fixture('Example.png') }, 16, true)).rejects.toThrow('Unrecognized image source');
   });
 
   it.each([0, -8, 1.5, Number.NaN])('rejects bits of %s', async (bits) => {
