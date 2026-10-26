@@ -1,4 +1,12 @@
-const median = (data) => {
+export interface ImageData {
+  width: number;
+  height: number;
+  data: ArrayLike<number>;
+}
+
+export type HashMethod = 1 | 2;
+
+const median = (data: number[]): number => {
   const mdarr = data.slice(0).sort((a, b) => a - b);
   if (mdarr.length % 2 === 0) {
     return (mdarr[mdarr.length / 2] + mdarr[mdarr.length / 2 + 1]) / 2.0;
@@ -6,12 +14,12 @@ const median = (data) => {
   return mdarr[Math.floor(mdarr.length / 2)];
 };
 
-const translateBlocksToBits = (blocks, pixelsPerBlock) => {
+const translateBlocksToBits = (blocks: number[], pixelsPerBlock: number): void => {
   const newblocks = blocks;
   const halfBlockValue = (pixelsPerBlock * 256 * 3) / 2;
   const bandsize = blocks.length / 4;
 
-  // Compare medians across four hor  zontal bands
+  // Compare medians across four horizontal bands
   for (let i = 0; i < 4; i += 1) {
     const m = median(blocks.slice(i * bandsize, (i + 1) * bandsize));
     for (let j = i * bandsize; j < (i + 1) * bandsize; j += 1) {
@@ -29,8 +37,8 @@ const translateBlocksToBits = (blocks, pixelsPerBlock) => {
   }
 };
 
-const bitsToHexhash = (bitsArray) => {
-  const hex = [];
+const bitsToHexhash = (bitsArray: number[]): string => {
+  const hex: string[] = [];
   for (let i = 0; i < bitsArray.length; i += 4) {
     const nibble = bitsArray.slice(i, i + 4);
     hex.push(parseInt(nibble.join(''), 2).toString(16));
@@ -39,11 +47,19 @@ const bitsToHexhash = (bitsArray) => {
   return hex.join('');
 };
 
-const bmvbhashEven = (data, bits) => {
+const pixelValue = (data: ImageData, index: number): number => {
+  const alpha = data.data[index + 3];
+  if (alpha === 0) {
+    return 765;
+  }
+  return data.data[index] + data.data[index + 1] + data.data[index + 2];
+};
+
+const bmvbhashEven = (data: ImageData, bits: number): string => {
   const blocksizeX = Math.floor(data.width / bits);
   const blocksizeY = Math.floor(data.height / bits);
 
-  const result = [];
+  const result: number[] = [];
 
   for (let y = 0; y < bits; y += 1) {
     for (let x = 0; x < bits; x += 1) {
@@ -53,14 +69,7 @@ const bmvbhashEven = (data, bits) => {
         for (let ix = 0; ix < blocksizeX; ix += 1) {
           const cx = x * blocksizeX + ix;
           const cy = y * blocksizeY + iy;
-          const ii = (cy * data.width + cx) * 4;
-
-          const alpha = data.data[ii + 3];
-          if (alpha === 0) {
-            total += 765;
-          } else {
-            total += data.data[ii] + data.data[ii + 1] + data.data[ii + 2];
-          }
+          total += pixelValue(data, (cy * data.width + cx) * 4);
         }
       }
 
@@ -72,24 +81,7 @@ const bmvbhashEven = (data, bits) => {
   return bitsToHexhash(result);
 };
 
-const bmvbhash = (data, bits) => {
-  const result = [];
-  let weightTop;
-  let weightBottom;
-  let weightLeft;
-  let weightRight;
-  let blockTop;
-  let blockBottom;
-  let blockLeft;
-  let blockRight;
-  let yMod;
-  let yFrac;
-  let yInt;
-  let xMod;
-  let xFrac;
-  let xInt;
-  const blocks = [];
-
+const bmvbhash = (data: ImageData, bits: number): string => {
   const evenX = data.width % bits === 0;
   const evenY = data.height % bits === 0;
 
@@ -98,17 +90,17 @@ const bmvbhash = (data, bits) => {
   }
 
   // initialize blocks array with 0s
-  for (let i = 0; i < bits; i += 1) {
-    blocks.push([]);
-    for (let j = 0; j < bits; j += 1) {
-      blocks[i].push(0);
-    }
-  }
+  const blocks = Array.from({ length: bits }, () => new Array<number>(bits).fill(0));
 
   const blockWidth = data.width / bits;
   const blockHeight = data.height / bits;
 
   for (let y = 0; y < data.height; y += 1) {
+    let weightTop: number;
+    let weightBottom: number;
+    let blockTop: number;
+    let blockBottom: number;
+
     if (evenY) {
       // don't bother dividing y, if the size evenly divides by bits
       blockBottom = Math.floor(y / blockHeight);
@@ -116,9 +108,9 @@ const bmvbhash = (data, bits) => {
       weightTop = 1;
       weightBottom = 0;
     } else {
-      yMod = (y + 1) % blockHeight;
-      yFrac = yMod - Math.floor(yMod);
-      yInt = yMod - yFrac;
+      const yMod = (y + 1) % blockHeight;
+      const yFrac = yMod - Math.floor(yMod);
+      const yInt = yMod - yFrac;
 
       weightTop = 1 - yFrac;
       weightBottom = yFrac;
@@ -134,14 +126,11 @@ const bmvbhash = (data, bits) => {
     }
 
     for (let x = 0; x < data.width; x += 1) {
-      let avgvalue;
-      const ii = (y * data.width + x) * 4;
-      const alpha = data.data[ii + 3];
-      if (alpha === 0) {
-        avgvalue = 765;
-      } else {
-        avgvalue = data.data[ii] + data.data[ii + 1] + data.data[ii + 2];
-      }
+      const avgvalue = pixelValue(data, (y * data.width + x) * 4);
+      let weightLeft: number;
+      let weightRight: number;
+      let blockLeft: number;
+      let blockRight: number;
 
       if (evenX) {
         blockRight = Math.floor(x / blockWidth);
@@ -149,9 +138,9 @@ const bmvbhash = (data, bits) => {
         weightLeft = 1;
         weightRight = 0;
       } else {
-        xMod = (x + 1) % blockWidth;
-        xFrac = xMod - Math.floor(xMod);
-        xInt = xMod - xFrac;
+        const xMod = (x + 1) % blockWidth;
+        const xFrac = xMod - Math.floor(xMod);
+        const xInt = xMod - xFrac;
 
         weightLeft = 1 - xFrac;
         weightRight = xFrac;
@@ -174,26 +163,18 @@ const bmvbhash = (data, bits) => {
     }
   }
 
-  for (let i = 0; i < bits; i += 1) {
-    for (let j = 0; j < bits; j += 1) {
-      result.push(blocks[i][j]);
-    }
-  }
+  const result = blocks.flat();
 
   translateBlocksToBits(result, blockWidth * blockHeight);
   return bitsToHexhash(result);
 };
 
-export default (imgData, bits, method) => {
-  let hash;
-
+export default (imgData: ImageData, bits: number, method: HashMethod): string => {
   if (method === 1) {
-    hash = bmvbhashEven(imgData, bits);
-  } else if (method === 2) {
-    hash = bmvbhash(imgData, bits);
-  } else {
-    throw new Error('Bad hashing method');
+    return bmvbhashEven(imgData, bits);
   }
-
-  return hash;
+  if (method === 2) {
+    return bmvbhash(imgData, bits);
+  }
+  throw new Error('Bad hashing method');
 };

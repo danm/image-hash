@@ -1,10 +1,8 @@
-const imageHash = require('../index');
+import { imageHash } from 'image-hash';
 
-const config = {
-  uri: 'https://ichef-1.bbci.co.uk/news/660/cpsprodpb/7F76/production/_95703623_mediaitem95703620.jpg'
-};
-
-imageHash(config, 16, true, (err, res) => {
-  if (err) throw err;
-  console.log(res);
-});
+const hash = await imageHash({
+  url: 'https://ichef-1.bbci.co.uk/news/660/cpsprodpb/7F76/production/_95703623_mediaitem95703620.jpg',
+  headers: { 'user-agent': 'image-hash-example' },
+  signal: AbortSignal.timeout(10_000),
+}, 16, true);
+console.log(hash);

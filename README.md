@@ -7,117 +7,113 @@ Supports JPG, PNG and WebP
 ## Install
 
 ```bash
-npm i -S image-hash
+npm i image-hash
 ```
+
+Requires Node.js 22.12 or later.
 
 ## Use
 
+`imageHash` returns a promise that resolves to the hash as a hex string.
+
 ```javascript
-const { imageHash }= require('image-hash');
+import { readFile } from 'node:fs/promises';
+import { imageHash } from 'image-hash';
 
-// remote file simple
-imageHash('https://ichef-1.bbci.co.uk/news/660/cpsprodpb/7F76/production/_95703623_mediaitem95703620.jpg', 16, true, (error, data) => {
-  if (error) throw error;
-  console.log(data);
-  // 0773063f063f36070e070a070f378e7f1f000fff0fff020103f00ffb0f810ff0
-});
+// local file
+const hash = await imageHash('./_95695590_tv039055678.jpg', 16, true);
+console.log(hash);
+// 0773063f063f36070e070a070f378e7f1f000fff0fff020103f00ffb0f810ff0
 
-// remote file with fetch config object
-const config = {
-  url: 'https://ichef-1.bbci.co.uk/news/660/cpsprodpb/7F76/production/_95703623_mediaitem95703620.jpg'
-};
+// bits and precise are optional, and default to 16 and true
+await imageHash('./_95695590_tv039055678.jpg');
 
-imageHash(config, 16, true, (error, data) => {
-  if (error) throw error;
-  console.log(data);
-  // 0773063f063f36070e070a070f378e7f1f000fff0fff020103f00ffb0f810ff0
-});
+// remote file
+await imageHash('https://ichef-1.bbci.co.uk/news/660/cpsprodpb/7F76/production/_95703623_mediaitem95703620.jpg', 16, true);
 
-//local file
-imageHash('./_95695590_tv039055678.jpg', 16, true, (error, data) => {
-  if (error) throw error;
-  console.log(data);
-  // 0773063f063f36070e070a070f378e7f1f000fff0fff020103f00ffb0f810ff0
-});
+// remote file with fetch options
+await imageHash({
+  url: 'https://ichef-1.bbci.co.uk/news/660/cpsprodpb/7F76/production/_95703623_mediaitem95703620.jpg',
+  headers: { authorization: 'Bearer token' },
+  signal: AbortSignal.timeout(10_000),
+}, 16, true);
 
-//Buffer
-const fBuffer = fs.readFileSync(__dirname + '/example/_95695591_tv039055678.jpeg');
-imageHash({
-  ext: 'image/jpeg',
-  data: fBuffer
-}, 16, true, (error, data) => {
-  if(error) throw error;
-  console.log(data);
-  // 0773063f063f36070e070a070f378e7f1f000fff0fff020103f00ffb0f810ff0
-});
+// Buffer
+const data = await readFile('./_95695591_tv039055678.jpeg');
+await imageHash(data, 16, true);
 
-//Buffer, without ext arg
-const fBuffer = fs.readFileSync(__dirname + '/example/_95695591_tv039055678.jpeg');
-imageHash({
-  data: fBuffer
-}, 16, true, (error, data) => {
-  if(error) throw error;
-  console.log(data);
-  // 0773063f063f36070e070a070f378e7f1f000fff0fff020103f00ffb0f810ff0
-});
+// Buffer, with mime type and file name
+await imageHash({ ext: 'image/jpeg', data, name: 'photo.jpeg' }, 16, true);
+```
+
+Errors (file not found, unsupported image type, failed requests) reject the promise, so use `try`/`catch` or `.catch()`.
+
+```javascript
+try {
+  await imageHash('./missing.jpg');
+} catch (error) {
+  console.error(error);
+}
+```
+
+The package is ESM, but CommonJS projects can still `require` it:
+
+```javascript
+const { imageHash } = require('image-hash');
+
+imageHash('./_95695590_tv039055678.jpg').then((hash) => console.log(hash));
 ```
 
 ## API
 
 ```typescript
-// name
-imageHash(location, bits, precise, callback);
-
-// types
-imageHash(string|object, int, bool, function);
+imageHash(src: string | Buffer | UrlRequestObject | BufferObject, bits?: number, precise?: boolean): Promise<string>
 ```
 
-## SETTINGS
-Image hash will log out warnings if environment variable `VERBOSE` is set to true.
+| Argument | Type | Description | Default | Example |
+| -------- | ---- | ----------- | ------- | ------- |
+| src | `string`, `Buffer` or `object` | A file path, an `http(s)` URL, a `Buffer`, a request object with a remote `url`, or a buffer object (see below) | Required | `'./image.jpg'` |
+| bits | `number` | The number of bits in a row. The more bits, the more unique the hash. Must be a positive integer. | `16` | `8` |
+| precise | `boolean` | Whether a precision algorithm is used. `true` Precise but slower, non-overlapping blocks. `false` Quick and crude, non-overlapping blocks. Method 2 is recommended as a good tradeoff between speed and good matches on any image size. The quick ones are only advisable when the image width and height are an even multiple of the number of blocks used. | `true` | `false` |
 
-
-### Image-Hash Arguments
-
-| Argument | Type | Description | Mandatory | Example |
-| -------- | ---- | ----------- | --------- | ------- |
-| location | `object` or `string` | A configuration object with a remote `url` (see below for details), `Buffer` object (See input types below for more details), or `String` with a valid url or file location | Yes | see above |
-| bits | `int` | The number of bits in a row. The more bits, the more unique the hash. | Yes | 8 |
-| precise  | `bool` | Whether a precision algorithm is used. `true` Precise but slower, non-overlapping blocks. `false` Quick and crude, non-overlapping blocks. Method 2 is recommended as a good tradeoff between speed and good matches on any image size. The quick ones are only advisable when the image width and height are an even multiple of the number of blocks used. | Yes | `true` |
-| callback | `function` | A function with `error` and `data` arguments - see below |
-
-#### Location Object Types
+### Source Object Types
 
 ```typescript
-// Url Request Object
-interface UrlRequestObject {
-  encoding?: string | null,
-  url: string | null,
-  // Additional fetch RequestInit options may be provided
-  [key: string]: unknown,
-};
+// Request object. Any other fetch options (headers, signal, ...) are passed to fetch.
+interface UrlRequestObject extends RequestInit {
+  url: string;
+}
 
-// Buffer Object
+// Buffer object
 interface BufferObject {
-  ext?: string, // mime type of buffered file
-  data: Buffer,
-  name?: string // file name for buffered file
-};
+  ext?: string; // mime type of the image, detected from the data if omitted
+  data: Buffer;
+  name?: string; // file name, used to check the extension matches the mime type
+}
 ```
 
-### Callback Arguments
+## Settings
 
-| Argument | Type                     | Description                                                                         |
-| -------- | ------------------------ | ----------------------------------------------------------------------------------- |
-| error    | `Error Object` or `null` | If a run time error is detected this will be an `Error Object`, otherwise `null`    |
-| data     | `string` or `null`       | If there is no run time error, this be will be your hashed result, otherwise `null` |
+Image hash will log out warnings if environment variable `VERBOSE` is set.
+
+## Upgrading from v7
+
+- The callback argument has been removed. `imageHash` now returns a promise.
+- `bits` and `precise` are optional.
+- A `Buffer` can be passed directly.
+- The package is now ESM and requires Node.js 22.12 or later.
 
 ## Development
 
-I have made this with Typescript, ESLint, Jest, Babel and VSCode. All config files and global binaries are included. For developers using VS Code, make sure you have ESLint extension installed.
+Built with TypeScript, ESLint and Vitest, using pnpm.
 
-## Testing
-
-`npm test`
+```bash
+pnpm install
+pnpm test
+pnpm run lint
+pnpm run typecheck
+pnpm run build
+```
 
 ## Credit
 

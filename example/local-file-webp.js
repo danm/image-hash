@@ -1,6 +1,5 @@
-const { imageHash } = require('../');
+import path from 'node:path';
+import { imageHash } from 'image-hash';
 
-imageHash('./Example.webp', 16, true, (err, res) => {
-  if (err) throw err;
-  console.log(res);
-});
+const hash = await imageHash(path.join(import.meta.dirname, 'Example.webp'), 16, true);
+console.log(hash);
