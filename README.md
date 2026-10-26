@@ -103,7 +103,12 @@ Image hash will log out warnings if environment variable `VERBOSE` is set.
 - A `Buffer` can be passed directly.
 - The package is now ESM and requires Node.js 22.12 or later.
 
-## Development
+## Upgrading from v7
+
+- The callback argument has been removed. `imageHash` now returns a promise.
+- `bits` and `precise` are optional.
+- A `Buffer` can be passed directly.
+- The package is now ESM and requires Node.js 22.12 or later.
 
 Built with TypeScript, ESLint and Vitest, using pnpm.
 
