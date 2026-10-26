@@ -1,194 +1,129 @@
-import fs from 'fs';
-import { Buffer } from 'buffer';
-import { fileTypeFromFile, fileTypeFromBuffer } from 'file-type';
+import { Buffer } from 'node:buffer';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
+import webp from '@cwasm/webp';
+import { fileTypeFromBuffer } from 'file-type';
 import jpeg from 'jpeg-js';
 import { PNG } from 'pngjs';
-import { URL } from 'url';
-import webp from '@cwasm/webp';
-import blockhash from './block-hash';
+import blockhash from './block-hash.js';
+import type { ImageData } from './block-hash.js';
 
-export interface UrlRequestObject {
-  encoding?: string | null,
-  url: string | null,
-  [key: string]: unknown,
+export interface UrlRequestObject extends RequestInit {
+  url: string;
+  /** @deprecated Ignored. Kept for backwards compatibility. */
+  encoding?: string | null;
 }
 
 export interface BufferObject {
-  ext?: string,
-  data: Buffer,
-  name?: string
+  /** Mime type of the image, e.g. `image/jpeg`. Detected from the data if omitted. */
+  ext?: string;
+  data: Buffer;
+  /** File name, used to check the file extension matches the mime type. */
+  name?: string;
 }
 
-const processPNG = (data, bits, method, cb) => {
-  try {
-    const png = PNG.sync.read(data);
-    const res = blockhash(png, bits, method ? 2 : 1);
-    cb(null, res);
-  } catch (e) {
-    cb(e);
-  }
-};
+export type ImageSource = string | Buffer | UrlRequestObject | BufferObject;
 
-const processJPG = (data, bits, method, cb) => {
-  try {
-    const decoded = jpeg.decode(data);
-    const res = blockhash(decoded, bits, method ? 2 : 1);
-    cb(null, res);
-  } catch (e) {
-    cb(e);
-  }
-};
+interface LoadedImage {
+  data: Buffer;
+  name?: string;
+  mime?: string;
+}
 
-const processWebp = (data, bits, method, cb) => {
-  try {
-    const decoded = webp.decode(data);
-    const res = blockhash(decoded, bits, method ? 2 : 1);
-    cb(null, res);
-  } catch (e) {
-    cb(e);
-  }
-};
+interface Decoder {
+  extensions: string[];
+  decode: (data: Buffer) => ImageData;
+}
 
-const isUrlRequestObject = (obj: UrlRequestObject | BufferObject): obj is UrlRequestObject => {
-  const casted = (obj as UrlRequestObject);
-  return casted.url && casted.url.length > 0;
-};
+const decoders = new Map<string, Decoder>([
+  ['image/png', { extensions: ['png'], decode: (data) => PNG.sync.read(data) }],
+  ['image/jpeg', { extensions: ['jpg', 'jpeg'], decode: (data) => jpeg.decode(data) }],
+  ['image/webp', { extensions: ['webp'], decode: (data) => webp.decode(data) }],
+]);
 
-const isBufferObject = (obj: UrlRequestObject | BufferObject): obj is BufferObject => {
-  const casted = (obj as BufferObject);
-  return Buffer.isBuffer(casted.data)
-    || (Buffer.isBuffer(casted.data) && (casted.ext && casted.ext.length > 0));
-};
+const isRemoteUrl = (src: string): boolean => /^https?:\/\//i.test(src);
 
-// eslint-disable-next-line
-export const imageHash = (oldSrc: string | UrlRequestObject | BufferObject, bits, method, cb) => {
-  const src = oldSrc;
+const isBufferObject = (src: object): src is BufferObject => (
+  'data' in src && Buffer.isBuffer(src.data)
+);
 
-  const getFileType = async (data: Buffer | string) => {
-    if (typeof src !== 'string' && isBufferObject(src) && src.ext) {
-      return {
-        mime: src.ext,
-      };
-    }
-    if (Buffer.isBuffer(data)) {
-      return fileTypeFromBuffer(data);
-    }
-    if (typeof src === 'string') {
-      return fileTypeFromFile(src);
-    }
-    return '';
-  };
+const isUrlRequestObject = (src: object): src is UrlRequestObject => (
+  'url' in src && typeof src.url === 'string' && src.url.length > 0
+);
 
-  const checkFileType = (name, data: Buffer | string) => {
-    getFileType(data).then((type) => {
-      // what is the image type
-      if (!type) {
-        cb(new Error('Mime type not found'));
-        return;
-      }
-      if (name && name.lastIndexOf('.') > 0) {
-        const ext = name
-          .split('.')
-          .pop()
-          .toLowerCase();
-        if (ext === 'png' && type.mime === 'image/png') {
-          processPNG(data, bits, method, cb);
-        } else if ((ext === 'jpg' || ext === 'jpeg') && type.mime === 'image/jpeg') {
-          processJPG(data, bits, method, cb);
-        } else if (ext === 'webp' && type.mime === 'image/webp') {
-          processWebp(data, bits, method, cb);
-        } else {
-          cb(new Error(`Unrecognized file extension, mime type or mismatch, ext: ${ext} / mime: ${type.mime}`));
-        }
-      } else {
-        if (process.env.verbose) console.warn('No file extension found, attempting mime typing.');
-        if (type.mime === 'image/png') {
-          processPNG(data, bits, method, cb);
-        } else if (type.mime === 'image/jpeg') {
-          processJPG(data, bits, method, cb);
-        } else if (type.mime === 'image/webp') {
-          processWebp(data, bits, method, cb);
-        } else {
-          cb(new Error(`Unrecognized mime type: ${type.mime}`));
-        }
-      }
-    }).catch((err) => {
-      cb(err);
-    });
-  };
+const fetchImage = async (src: string | UrlRequestObject): Promise<LoadedImage> => {
+  // `encoding` is a leftover from the `request` library and is not a valid fetch option
+  const { url, encoding, ...init } = typeof src === 'string' ? { url: src } : src;
 
-  const fetchRemoteImage = async (remoteSrc: string | UrlRequestObject) => {
-    if (fetch && typeof fetch !== 'function') {
-      cb(new Error('Global fetch API is not available. Node.js 18+ is required.'));
-      return;
-    }
-
-    const requestUrl = typeof remoteSrc === 'string' ? remoteSrc : remoteSrc.url;
-
-    if (!requestUrl) {
-      cb(new Error('No URL provided for remote image.'));
-      return;
-    }
-
-    let init: { [key: string]: unknown } | undefined;
-
-    if (typeof remoteSrc !== 'string') {
-      init = { ...remoteSrc };
-      delete init.url;
-      delete init.encoding;
-    }
-
-    try {
-      const response = await fetch(requestUrl, init);
-      if (!response || !response.ok) {
-        const status = response ? `${response.status} ${response.statusText}` : 'Unknown status';
-        throw new Error(`Failed to fetch image. HTTP status: ${status}`);
-      }
-
-      const arrayBuffer = await response.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
-
-      let pathname = '';
-      try {
-        const url = new URL(response.url || requestUrl);
-        pathname = url.pathname;
-      } catch (err) {
-        pathname = '';
-      }
-
-      checkFileType(pathname, buffer);
-    } catch (error) {
-      cb(error);
-    }
-  };
-
-  const handleReadFile = (err, res) => {
-    if (err) {
-      cb(new Error(err));
-      return;
-    }
-    checkFileType(src, res);
-  };
-
-  // check source
-  // is source assigned
-  if (src === undefined) {
-    cb(new Error('No image source provided'));
-    return;
+  const response = await fetch(url, init);
+  if (!response.ok) {
+    await response.body?.cancel();
+    throw new Error(`Failed to fetch image. HTTP status: ${response.status} ${response.statusText}`);
   }
 
-  // is src url or file
-  if (typeof src === 'string' && (src.indexOf('http') === 0 || src.indexOf('https') === 0)) {
-    // url
-    fetchRemoteImage(src);
-  } else if (typeof src !== 'string' && isBufferObject(src)) {
-    // image buffers
-    checkFileType(src.name, src.data);
-  } else if (typeof src !== 'string' && isUrlRequestObject(src)) {
-    // Request Object
-    fetchRemoteImage(src);
-  } else {
-    // file
-    fs.readFile(src, handleReadFile);
+  const data = Buffer.from(await response.arrayBuffer());
+  return { data, name: new URL(response.url || url).pathname };
+};
+
+const loadImage = async (src: ImageSource): Promise<LoadedImage> => {
+  if (typeof src === 'string') {
+    if (isRemoteUrl(src)) {
+      return fetchImage(src);
+    }
+    return { data: await readFile(src), name: src };
   }
+  if (Buffer.isBuffer(src)) {
+    return { data: src };
+  }
+  if (isBufferObject(src)) {
+    return { data: src.data, name: src.name, mime: src.ext || undefined };
+  }
+  if (isUrlRequestObject(src)) {
+    return fetchImage(src);
+  }
+  throw new TypeError('Unrecognized image source');
+};
+
+const getDecoder = async ({ data, name, mime }: LoadedImage): Promise<Decoder> => {
+  const type = mime ?? (await fileTypeFromBuffer(data))?.mime;
+  if (!type) {
+    throw new Error('Mime type not found');
+  }
+
+  const decoder = decoders.get(type);
+  const ext = name ? path.extname(name).slice(1).toLowerCase() : '';
+
+  if (ext) {
+    if (!decoder?.extensions.includes(ext)) {
+      throw new Error(`Unrecognized file extension, mime type or mismatch, ext: ${ext} / mime: ${type}`);
+    }
+    return decoder;
+  }
+
+  if (process.env.VERBOSE) console.warn('No file extension found, attempting mime typing.');
+  if (!decoder) {
+    throw new Error(`Unrecognized mime type: ${type}`);
+  }
+  return decoder;
+};
+
+/**
+ * Create a perceptual hash of an image.
+ *
+ * @param src A file path, an http(s) URL, a Buffer, a `BufferObject` or a `UrlRequestObject`.
+ * @param bits The number of bits in a row. The more bits, the more unique the hash.
+ * @param precise `true` for the precise but slower algorithm, `false` for the quick one.
+ * @returns The hash as a hex string.
+ */
+export const imageHash = async (src: ImageSource, bits = 16, precise = true): Promise<string> => {
+  if (src == null) {
+    throw new TypeError('No image source provided');
+  }
+  if (!Number.isInteger(bits) || bits <= 0) {
+    throw new TypeError(`bits must be a positive integer, received: ${String(bits)}`);
+  }
+
+  const image = await loadImage(src);
+  const decoder = await getDecoder(image);
+  return blockhash(decoder.decode(image.data), bits, precise ? 2 : 1);
 };

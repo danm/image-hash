@@ -1,19 +1,31 @@
 {
   "name": "image-hash",
-  "version": "7.0.1",
+  "version": "8.0.0",
   "description": "Create a hash from an image",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "build": "tsc",
-    "lint": "eslint src/*.ts",
-    "lint:fix": "eslint src/*.ts --fix"
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.js"
+    }
   },
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
   "files": [
     "lib"
   ],
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "packageManager": "pnpm@10.34.9",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/danm/image-hash.git"
@@ -32,24 +44,20 @@
   "homepage": "https://github.com/danm/image-hash#readme",
   "dependencies": {
     "@cwasm/webp": "^0.1.5",
-    "file-type": "^21.0.0",
-    "jpeg-js": "^0.4.0",
+    "file-type": "^22.2.0",
+    "jpeg-js": "^0.4.4",
     "pngjs": "^7.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.5.2",
-    "@vitest/coverage-v8": "^3.2.4",
-    "eslint": "^9.36.0",
-    "@types/pngjs": "^6.0.1",
-    "eslint-config-airbnb-typescript": "^18.0.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.25.4",
-    "typescript": "^5.9.2",
-    "vitest": "^3.2.4"
-  },
-  "pnpm": {
-    "overrides": {
-      "esbuild": "0.25.0"
-    }
+    "@eslint/js": "^10.0.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/node": "^22.20.5",
+    "@types/pngjs": "^6.0.5",
+    "@vitest/coverage-v8": "^5.0.5",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.0",
+    "vitest": "^5.0.5"
   }
 }

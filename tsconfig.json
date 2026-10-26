@@ -1,22 +1,16 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "esModuleInterop": true,
-        "target": "es2015",
-        "noEmitOnError": true,
-        "declaration": true,
-        "resolveJsonModule": true,
-        "moduleResolution": "node",
-        "sourceMap": true,
-        "outDir": "lib",
-        "baseUrl": ".",
-        "paths": {
-            "*": [
-                "node_modules/*",
-            ]
-        },
-    },
-    "include": [
-        "src/**/*"
-    ]
+  "compilerOptions": {
+    "target": "es2023",
+    "lib": ["es2023"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "strict": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["src", "__tests__", "*.ts"]
 }
