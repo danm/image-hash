@@ -28,7 +28,8 @@ export default defineConfig(
     },
   },
   {
-    files: ['**/*.js'],
+    // staged-test is type checked with its own tsconfig once a tarball is installed
+    files: ['**/*.js', 'staged-test/**'],
     extends: [tseslint.configs.disableTypeChecked],
   },
 );

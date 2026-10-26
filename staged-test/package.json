@@ -1,0 +1,16 @@
+{
+  "name": "image-hash-staged-test",
+  "private": true,
+  "description": "Tests a staged or packed image-hash tarball, installed the way a user would install it",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "test": "node --test && tsc -p types"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "~6.0.3"
+  }
+}
