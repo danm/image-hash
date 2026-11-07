@@ -1,7 +1,6 @@
 import { Buffer } from 'node:buffer';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
-import webp from '@cwasm/webp';
 import { fileTypeFromBuffer } from 'file-type';
 import jpeg from 'jpeg-js';
 import { PNG } from 'pngjs';
@@ -32,13 +31,21 @@ interface LoadedImage {
 
 interface Decoder {
   extensions: string[];
-  decode: (data: Buffer) => ImageData;
+  decode: (data: Buffer) => ImageData | Promise<ImageData>;
 }
+
+// @cwasm/webp is libwebp compiled to WebAssembly, and it reads webp.wasm from its own folder
+// as soon as it is loaded. Loading it only when a WebP image is hashed means JPEG and PNG
+// still work where that file is missing, e.g. in a bundle that does not copy it.
+const decodeWebp = async (data: Buffer): Promise<ImageData> => {
+  const { default: webp } = await import('@cwasm/webp');
+  return webp.decode(data);
+};
 
 const decoders = new Map<string, Decoder>([
   ['image/png', { extensions: ['png'], decode: (data) => PNG.sync.read(data) }],
   ['image/jpeg', { extensions: ['jpg', 'jpeg'], decode: (data) => jpeg.decode(data) }],
-  ['image/webp', { extensions: ['webp'], decode: (data) => webp.decode(data) }],
+  ['image/webp', { extensions: ['webp'], decode: decodeWebp }],
 ]);
 
 const isRemoteUrl = (src: string): boolean => /^https?:\/\//i.test(src);
@@ -125,5 +132,5 @@ export const imageHash = async (src: ImageSource, bits = 16, precise = true): Pr
 
   const image = await loadImage(src);
   const decoder = await getDecoder(image);
-  return blockhash(decoder.decode(image.data), bits, precise ? 2 : 1);
+  return blockhash(await decoder.decode(image.data), bits, precise ? 2 : 1);
 };
