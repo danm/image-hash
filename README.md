@@ -12,6 +12,10 @@ npm i image-hash
 
 Requires Node.js 22.12 or later.
 
+### Bundling
+
+WebP images are decoded with [@cwasm/webp](https://github.com/LinusU/cwasm-webp), a WebAssembly build of libwebp, which reads `webp.wasm` from its package folder. It is only loaded the first time a WebP image is hashed, so JPEG and PNG images work in a bundle (e.g. esbuild or webpack) as they are. To hash WebP images from a bundle, copy `node_modules/@cwasm/webp/webp.wasm` next to the bundled file.
+
 ## Use
 
 `imageHash` returns a promise that resolves to the hash as a hex string.
